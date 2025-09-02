@@ -4471,184 +4471,131 @@ table.compact th,table.compact td{padding:8px 10px;border-bottom:1px solid #e5e7
 
 </style>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/docx/8.4.0/docx.umd.js"></script>
-<style id="jle-exec-kpi">
 
-/* === JLE custom: Executive Analysis & Print Fixes v1 === */
-:root{
-  --card-bg: #0b0f19;
-  --card-bd: #1f2937;
-  --muted: #9ca3af;
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<style id="jle-print-landscape-kpi11-detalle55">
+@media print {
+  @page { size: landscape; margin: 10mm; }
+  body { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+  /* Apply only when JS adds these classes */
+  .kpi-print-11, .kpi-print-11 * { font-size: 11px !important; line-height: 1.25 !important; }
+  .detail-monthly-5p5, .detail-monthly-5p5 * { font-size: 5.5px !important; line-height: 1.15 !important; }
 }
-/* Executive section layout */
-#execWrap{
+</style>
+
+
+
+
+
+<style id="jle-trend-below-css">
+/* Wrapper under the canvas */
+.trend-below-wrap{ margin-top: 8px; }
+.trend-below-toggle{
+  display:inline-flex; gap:8px; align-items:center;
+  padding:8px 12px; border:1px solid #e5e7eb; border-radius:999px;
+  background:#fff; font:700 12px/1.2 system-ui, Segoe UI, Arial; color:#111827; cursor:pointer;
+  box-shadow:0 1px 2px rgba(0,0,0,0.03);
+}
+.trend-below-toggle:hover{ background:#f9fafb; }
+.trend-below-panel{
+  display:none; margin-top:8px;
+  border:1px solid #e5e7eb; border-radius:12px; background:#fff;
+  box-shadow:0 1px 2px rgba(0,0,0,0.03);
+  padding:10px 12px;
+}
+.trend-below-panel.open{ display:block; }
+
+.trend-dd-head{ display:flex; align-items:center; gap:8px; margin-bottom:8px; }
+.trend-dd-head input[type="search"]{
+  flex:1 1 auto; min-width:120px; padding:6px 10px;
+  border:1px solid #e5e7eb; border-radius:999px;
+  font:600 12px/1.2 system-ui, Segoe UI, Arial;
+}
+.trend-dd-head .btn{
+  padding:6px 10px; border:1px solid #e5e7eb; border-radius:999px; background:#fff;
+  font:700 12px/1.2 system-ui, Segoe UI, Arial; color:#111827; cursor:pointer;
+}
+.trend-dd-head .btn:hover{ background:#f3f4f6; }
+
+#trendCatTable{ width:100%; border-collapse:collapse; table-layout:fixed; }
+#trendCatTable td{
+  padding:6px; border-bottom:1px dashed #f3f4f6; vertical-align:middle;
+  font:600 13px/1.2 system-ui, Segoe UI, Arial; color:#111827;
+  overflow:hidden; text-overflow:ellipsis; white-space:nowrap;
+}
+#trendCatTable td.chk{ width:26px; }
+#trendCatTable td.sw{ width:38px; }
+.trend-swatch{ width:26px; height:12px; border-radius:3px; background:#f8fafc; border:3px solid #9ca3af; box-sizing:border-box; }
+#trendCatTable tr.off td{ color:#9ca3af; text-decoration:line-through; }
+#trendCatTable tr.off .trend-swatch{ opacity:.5; }
+.trend-meta{ margin-top:6px; font:600 12px/1.2 system-ui, Segoe UI, Arial; color:#6b7280; }
+
+@media print{
+  .trend-below-toggle, .trend-below-panel{ display:none !important; }
+}
+</style>
+
+
+
+<style id="jle-external-legend-css">
+/* Tarjeta de leyenda EXTERNA (independiente de la gráfica) */
+.ext-trend-legend-card{
+  border: 1px solid #e5e7eb;
+  background: #fff;
+  border-radius: 12px;
+  padding: 12px 14px;
+  box-shadow: 0 1px 2px rgba(0,0,0,0.04);
   margin-top: 12px;
 }
-#execWrap .exec-grid{
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 14px;
-}
-#execWrap .exec-card{
-  background: var(--card-bg);
-  border: 1px solid var(--card-bd);
-  border-radius: 14px;
-  padding: 12px 14px;
-}
-#execWrap .exec-card h3{
+.ext-trend-legend-card h4{
   margin: 0 0 8px 0;
-  font-size: 15px;
-  line-height: 1.2;
+  font: 700 14px/1.3 system-ui, Segoe UI, Arial;
+  color: #111827;
 }
-#execWrap .exec-card ul{
-  margin: 0;
-  padding-left: 18px;
-}
-#execWrap .exec-card li{ 
-  margin: 4px 0; 
-  line-height: 1.35;
-}
-#execText{
-  white-space: pre-wrap;
-  font-size: 12px;
-  line-height: 1.35;
-  color: var(--muted);
-}
-
-/* If the page already renders bullets inside #execBullets, make them pretty */
-#execBullets{
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 14px;
-}
-#execBullets > strong{
-  display: block;
-  grid-column: span 2;
-  margin-top: 4px;
-}
-#execBullets > ul, #execBullets > div{
-  background: var(--card-bg);
-  border: 1px solid var(--card-bd);
-  border-radius: 14px;
-  padding: 10px 12px;
-}
-
-/* KPI table/grid safety for print */
-table, .table, .kpi-grid, .kpi, .kpi-cards{
+.ext-legend-list{
   width: 100%;
+  border-collapse: collapse;
+  table-layout: fixed;
 }
-.kpi-grid, .kpi, .kpi-cards, .kpi-table, .kpi-table thead, .kpi-table tbody, .kpi-table tr, .kpi-table td, .kpi-table th{
-  break-inside: avoid;
-  page-break-inside: avoid;
+.ext-legend-list td{
+  padding: 6px 6px;
+  border-bottom: 1px dashed #f3f4f6;
+  vertical-align: middle;
+  font: 600 13px/1.2 system-ui, Segoe UI, Arial;
+  color: #111827;
+  overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
 }
-/* Prevent charts and cards from splitting in PDF */
-canvas, .card, .panel, .chart, .exec-card, #execWrap, #charts, #charts3, #kpi, [id*="kpi"], [class*="kpi"]{
-  break-inside: avoid;
-  page-break-inside: avoid;
+.ext-legend-list td.emo{ width: 32px; text-align: center; }
+.ext-legend-list td.sw{ width: 40px; }
+.ext-legend-swatch{
+  width: 26px; height: 12px;
+  border-radius: 3px;
+  background: #f8fafc;
+  border: 3px solid #9ca3af; /* color por inline style */
+  box-sizing: border-box;
 }
-
-/* Print tweaks */
-@page{
-  size: A4;
-  margin: 12mm;
-}
+/* Modo impresión: se imprime normal como parte del informe */
 @media print{
-  body.export-clean{
-    background: #fff !important;
-  }
-  /* Hide uploader/toolbar if present */
-  #uploadCard, #uploadZone, .toolbar, .topbar, header, .print-hide{
-    display: none !important;
-  }
-  /* Single column for exec on print */
-  #execBullets, #execWrap .exec-grid{
-    grid-template-columns: 1fr !important;
-  }
-  /* Reduce font a bit to keep tables on page */
-  table, .kpi-table{ font-size: 11px !important; }
-  #execText{ font-size: 11px !important; }
-  /* Make tables wrap instead of overflow */
-  table{ table-layout: auto !important; }
-  td, th{ word-break: break-word; overflow-wrap: anywhere; }
-  /* Avoid giant canvases */
-  canvas{ max-width: 100% !important; height: auto !important; }
+  .ext-trend-legend-card{ break-inside: avoid; }
 }
-
-/* Optional subtle separators between sections */
-.section-sep{ height: 1px; background: #1f2937; margin: 8px 0; }
-
 </style>
-<style id="jle-print-orientation">
-
-/* === JLE print orientation override: Landscape A4 + fit tweaks === */
-@page{
-  size: A4 landscape;
-  margin: 10mm;
-}
-@media print{
-  /* Slightly tighter fonts to fit more on landscape */
-  body{ font-size: 12px !important; }
-  table, .kpi-table{ font-size: 11px !important; }
-  /* Ensure two columns for main content if your layout supports it; 
-     keep executive in single column to avoid split */
-  #execBullets, #execWrap .exec-grid{ grid-template-columns: 1fr !important; }
-  /* Avoid splitting charts/cards */
-  canvas, .card, .panel, .chart, .exec-card, .kpi-grid, .kpi-table, .kpi, [id*="kpi"], [class*="kpi"]{
-    break-inside: avoid !important;
-    page-break-inside: avoid !important;
-  }
-  /* Make canvases/images responsive in print */
-  canvas, img{ max-width: 100% !important; height: auto !important; }
-  /* Let tables use full width and wrap text */
-  table{ width: 100% !important; table-layout: auto !important; }
-  td, th{ word-break: break-word; overflow-wrap: anywhere; }
-}
-
-</style>
-<style id="jle-kpi7-print">
-
-/* === JLE: KPI table print size 7pt === */
-@media print{
-  .kpi-table{
-    font-size: 7pt !important;
-    line-height: 1.15 !important;
-  }
-  .kpi-table th, .kpi-table td{
-    padding: 2px 6px !important;
-  }
-}
-
-</style>
-<style id="jle-kpi55-print">
-
-/* === JLE: KPI table print size 5.5pt === */
-@media print{
-  .kpi-table{
-    font-size: 5.5pt !important;
-    line-height: 1.1 !important;
-  }
-  .kpi-table th, .kpi-table td{
-    padding: 1px 4px !important;
-  }
-}
-
-</style>
-<style id="jle-kpi4-print">
-
-/* === JLE: KPI table print size 4pt === */
-@media print{
-  .kpi-table{
-    font-size: 4pt !important;
-    line-height: 1.05 !important;
-  }
-  .kpi-table th, .kpi-table td{
-    padding: 0.5px 2px !important;
-  }
-}
-
-</style>
-
-
-
 </head>
 <body>
 </div>
@@ -6543,375 +6490,545 @@ function autoApplyAllCats(force=false){
 </script>
 
 
-<script id="jle-exec-enhancer">
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<script id="jle-unified-fixes-v4">
 (function(){
-  function enhanceExec(){
-    const wrap = document.getElementById('execWrap');
-    const bullets = document.getElementById('execBullets');
-    if (!wrap || !bullets) return;
-    // If not already enhanced, wrap each immediate UL into a card-like div
-    if (!bullets.__jleEnhanced){
-      const kids = Array.from(bullets.childNodes);
-      const frag = document.createDocumentFragment();
-      let currentGroup = null;
-      kids.forEach(node => {
-        if (node.tagName === 'STRONG'){
-          const h = document.createElement('div');
-          h.className = 'exec-card';
-          const h3 = document.createElement('h3');
-          h3.textContent = node.textContent.trim();
-          h.appendChild(h3);
-          frag.appendChild(h);
-          currentGroup = h;
-        } else if (node.tagName === 'UL'){
-          const card = document.createElement('div');
-          card.className = 'exec-card';
-          const ul = node.cloneNode(true);
-          card.appendChild(ul);
-          frag.appendChild(card);
-        } else if (node.tagName === 'DIV'){
-          const card = document.createElement('div');
-          card.className = 'exec-card';
-          card.textContent = node.textContent.trim();
-          frag.appendChild(card);
-        }
-      });
-      if (frag.childNodes.length){
-        bullets.innerHTML = '';
-        const grid = document.createElement('div');
-        grid.className = 'exec-grid';
-        grid.appendChild(frag);
-        bullets.appendChild(grid);
+  // ---------- helpers ----------
+  function norm(t){ return (t||'').toLowerCase().replace(/\s+/g,' ').trim(); }
+  function findSectionByHeading(matchFn){
+    var hs=document.querySelectorAll('h1,h2,h3,h4,h5');
+    for (var i=0;i<hs.length;i++){
+      var txt=norm(hs[i].textContent||'');
+      if (matchFn(txt)){
+        return hs[i].closest('section, .card, .panel, .box, .container, .chart, div') || hs[i].parentElement;
       }
-      bullets.__jleEnhanced = true;
     }
+    return null;
   }
-  if (document.readyState === 'loading'){
-    document.addEventListener('DOMContentLoaded', enhanceExec);
-  } else { enhanceExec(); }
-  // Re-run after data load (some apps render later)
-  setTimeout(enhanceExec, 1200);
-})();
-</script>
+  // Specific sections
+  function isTrendTodas(txt){
+    return txt.includes('tendencia') && txt.includes('gastos') && txt.includes('categor') && txt.includes('(todas)');
+  }
+  function isMoM(txt){
+    return (txt.includes('cambios del último mes') || txt.includes('mom')) && (txt.includes('top 3') || txt.includes('↑') || txt.includes('↓'));
+  }
 
+  function findTrendSection(){ return findSectionByHeading(isTrendTodas); }
+  function findMoMSection(){ return findSectionByHeading(isMoM); }
+  function findTrendCanvas(){
+    var sec=findTrendSection(); if (!sec) return null;
+    var cv=sec.querySelector('canvas'); if (cv) return cv;
+    return document.getElementById('trendAllCats') || document.getElementById('allCatsTrend') || null;
+  }
 
-
-
-
-<script id="jle-open-snapshot">
-(function(){
-  async function onOpenSnapshot(){
+  // ---------- 1) Abrir copia HTML -> use freezeDomClone() and open in new tab ----------
+  function openFrozenInNewTab(ev){
+    if (ev){ try{ ev.preventDefault(); ev.stopPropagation(); ev.stopImmediatePropagation(); }catch(_){ } }
     try{
-      // Helper: try to persist STATE into embeddedData on the live page if possible
-      try{
-        if (typeof ensureSnapshotInDOM === 'function'){ ensureSnapshotInDOM(); }
-      }catch(_){}
-
-      // Attempt 1: Build payload from live STATE
-      let payload = null;
-      if (window.STATE && Array.isArray(STATE.cats) && STATE.cats.length && Array.isArray(STATE.months) && STATE.months.length){
-        let totals = Array.isArray(STATE.totalsPerMonth) && STATE.totalsPerMonth.length ? STATE.totalsPerMonth : [];
-        if (!totals.length && STATE.cats.length){
-          const n = (STATE.cats[0].monthly||[]).length;
-          totals = Array(n).fill(0);
-          STATE.cats.forEach(c => { for(let i=0;i<n;i++){ totals[i] += (c.monthly[i]||0); } });
-        }
-        payload = { months: STATE.months, cats: STATE.cats, totalsPerMonth: totals, meta: { generatedAt: new Date().toISOString(), kind: 'interactive-snapshot' } };
+      if (typeof freezeDomClone !== 'function'){
+        alert('No encuentro el generador de HTML congelado (freezeDomClone).');
+        return false;
       }
-
-      // Attempt 2: Fallback to embeddedData in current page
-      if (!payload){
-        const embedLive = document.getElementById('embeddedData');
-        if (embedLive && embedLive.textContent){
-          try{
-            const p = JSON.parse(embedLive.textContent);
-            if (p && Array.isArray(p.cats) && p.cats.length && Array.isArray(p.months) && p.months.length){
-              let totals = Array.isArray(p.totalsPerMonth) && p.totalsPerMonth.length ? p.totalsPerMonth : [];
-              if (!totals.length && p.cats.length){
-                const n = (p.cats[0].monthly||[]).length;
-                totals = Array(n).fill(0);
-                p.cats.forEach(c => { for(let i=0;i<n;i++){ totals[i] += (c.monthly[i]||0); } });
-              }
-              payload = { months: p.months, cats: p.cats, totalsPerMonth: totals, meta: p.meta || { generatedAt: new Date().toISOString(), kind: 'interactive-snapshot' } };
-            }
-          }catch(_){}
-        }
-      }
-
-      if (payload){
-        // Interactive copy with embedded data + autoboot
-        const clone = document.documentElement.cloneNode(true);
-        // Ensure embeddedData exists
-        let embed = clone.querySelector('#embeddedData');
-        if (!embed){
-          const s = clone.ownerDocument.createElement('script');
-          s.type = 'application/json'; s.id = 'embeddedData';
-          (clone.querySelector('body')||clone).appendChild(s);
-          embed = clone.querySelector('#embeddedData');
-        }
-        embed.textContent = JSON.stringify(payload);
-        // Remove uploader
-        const up = clone.querySelector('#uploadCard'); if (up) up.remove();
-        const uz = clone.querySelector('#uploadZone'); if (uz) uz.remove();
-        // Autoboot charts on load
-        const boot = clone.ownerDocument.createElement('script');
-        boot.id = 'snapshot-autoboot';
-        boot.textContent = "(function(){function boot(){try{if (typeof tryLoadEmbeddedSnapshot==='function'){var ok=tryLoadEmbeddedSnapshot(); if(!ok){setTimeout(boot,300);} } else { setTimeout(boot,300); }}catch(e){setTimeout(boot,300);} } if (document.readyState==='loading'){document.addEventListener('DOMContentLoaded', boot);} else { boot(); }})();";
-        (clone.querySelector('body')||clone).appendChild(boot);
-        const htmlText = '<!DOCTYPE html>\n' + clone.outerHTML;
-        const blob = new Blob([htmlText], {type:'text/html'});
-        const url = URL.createObjectURL(blob);
-        window.open(url, '_blank');
-        setTimeout(()=> URL.revokeObjectURL(url), 60000);
-        return;
-      }
-
-      // Attempt 3 (final fallback): Freeze current DOM with canvases as images (static snapshot)
-      if (typeof freezeDomClone === 'function'){
-        const frozen = freezeDomClone(); // removes scripts, converts canvases to images, hides uploader
-        const blob = new Blob([frozen], {type:'text/html'});
-        const url = URL.createObjectURL(blob);
-        window.open(url, '_blank');
-        setTimeout(()=> URL.revokeObjectURL(url), 60000);
-        return;
-      }
-
-      alert('No encontré datos. Sube un Excel o usa un HTML con snapshot incrustado.');
+      var html = freezeDomClone();
+      var blob = new Blob([html], {type:'text/html'});
+      var url = URL.createObjectURL(blob);
+      window.open(url, '_blank', 'noopener');
+      return false;
     }catch(e){
-      console.warn('onOpenSnapshot failed', e);
-      alert('No se pudo abrir la copia HTML.');
+      console.error(e);
+      alert('No pude abrir la copia HTML.');
+      return false;
     }
   }
-  const b = document.getElementById('btnOpenSnapshot');
-  if (b && !b.__wired){
-    b.__wired = true;
-    b.addEventListener('click', onOpenSnapshot);
+  function wireOpenCopy(){
+    var els=document.querySelectorAll('button, a, .btn');
+    for (var i=0;i<els.length;i++){
+      var t=norm(els[i].textContent||'');
+      if (t.includes('abrir copia html')){
+        if (!els[i].__wiredOpenFreeze){
+          els[i].__wiredOpenFreeze = true;
+          els[i].addEventListener('click', openFrozenInNewTab, true);
+        }
+      }
+    }
   }
-})();
-</script>
 
+  // ---------- 2) PDF sizes: KPI=11, Detalle mensual=5.5 ----------
+  function findKpiSections(){
+    var hits=[];
+    // IDs/clases que contengan kpi
+    document.querySelectorAll('[id*="kpi" i], [class*="kpi" i]').forEach(function(n){ if (n.querySelector('table, .table, .grid')) hits.push(n); });
+    // Headings con "KPI"
+    document.querySelectorAll('h1,h2,h3,h4,h5').forEach(function(h){
+      if (norm(h.textContent||'').includes('kpi')){
+        var sec=h.closest('section, .card, .panel, .box, div')||h.parentElement; if (sec) hits.push(sec);
+      }
+    });
+    return Array.from(new Set(hits));
+  }
+  function findDetalleMensualSections(){
+    var hits=[];
+    document.querySelectorAll('h1,h2,h3,h4,h5').forEach(function(h){
+      var t=norm(h.textContent||'');
+      if (t.includes('detalle') && t.includes('categor') && t.includes('mensual')){
+        var sec=h.closest('section, .card, .panel, .box, .table, div')||h.parentElement; if (sec) hits.push(sec);
+      }
+    });
+    hits = hits.filter(function(n){ return !!n.querySelector('table, .table'); });
+    return Array.from(new Set(hits));
+  }
+  function markPrintClasses(on){
+    findKpiSections().forEach(function(sec){ if (on) sec.classList.add('kpi-print-11'); else sec.classList.remove('kpi-print-11'); });
+    findDetalleMensualSections().forEach(function(sec){ if (on) sec.classList.add('detail-monthly-5p5'); else sec.classList.remove('detail-monthly-5p5'); });
+  }
+  function wireExportPDF(){
+    var els=document.querySelectorAll('button, a, .btn');
+    for (var i=0;i<els.length;i++){
+      var t=norm(els[i].textContent||'');
+      if (t.includes('exportar pdf')){
+        if (!els[i].__wiredPDF){
+          els[i].__wiredPDF = true;
+          els[i].addEventListener('click', function(ev){
+            try{ ev.preventDefault(); }catch(_){}
+            markPrintClasses(true);
+            try{ window.focus(); }catch(_){}
+            window.print();
+            function cleanup(){ markPrintClasses(false); window.removeEventListener('afterprint', cleanup); document.removeEventListener('webkitafterprint', cleanup); }
+            window.addEventListener('afterprint', cleanup);
+            document.addEventListener('webkitafterprint', cleanup);
+          }, true);
+        }
+      }
+    }
+  }
 
+  // ---------- 3) Trend (todas): remove filters & "Details" ----------
+  function cleanTrendUI(){
+    var sec=findTrendSection(); if (!sec) return;
+    var sel=[
+      '#allCatsFilterBar','#allCatsChecks','#allCatsToolbar','.allCatsFilters','[data-role="allCatsFilters"]',
+      'details','summary'
+    ].join(',');
+    sec.querySelectorAll(sel).forEach(function(el){ el.remove(); });
+    // remove any button/anchor labeled "Details"
+    sec.querySelectorAll('button, a, .btn, [role="button"]').forEach(function(b){
+      var t=norm(b.textContent||'');
+      if (t === 'details') b.remove();
+      if (t.startsWith('filtrar categor')) b.remove();
+    });
+  }
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-<script id="jle-filters-bus-sync">
-(function(){
-  // ---- 1) Global FILTERS store ----
-  window.FILTERS = window.FILTERS || {
-    selected: new Set(),
-    set(arr){
-      this.selected = new Set((arr||[]).filter(Boolean));
+  // ---------- 4) End-of-line labels for Trend (scoped) ----------
+  var endLabelsPluginScoped = {
+    id: 'endLabelsPlugin_scoped_v3',
+    afterDatasetsDraw: function(chart){
       try{
-        document.dispatchEvent(new CustomEvent('filters:change', { detail: { selected: Array.from(this.selected) } }));
+        var cv = findTrendCanvas(); if (!cv || chart.canvas !== cv) return;
+        if (chart.config.type !== 'line') return;
+        var ctx=chart.ctx; ctx.save(); ctx.textAlign='left'; ctx.textBaseline='middle';
+        var fam = (window.getComputedStyle(chart.canvas).fontFamily || 'system-ui, Arial');
+        ctx.font = '12px ' + fam;
+        var sets = chart.data.datasets || [];
+        for (var i=0;i<sets.length;i++){
+          if (typeof chart.isDatasetVisible==='function' && !chart.isDatasetVisible(i)) continue;
+          var meta = chart.getDatasetMeta(i); if (!meta || meta.hidden) continue;
+          var pts = meta.data || []; if (!pts.length) continue;
+          var el=null; for (var k=pts.length-1;k>=0;k--){ var p=pts[k]; if (p && isFinite(p.x) && isFinite(p.y)){ el=p; break; } }
+          if (!el) continue;
+          var x=el.x+6, y=el.y;
+          var col = sets[i].borderColor; if (Array.isArray(col)) col=col[0];
+          ctx.fillStyle = col || '#111';
+          var lbl = sets[i].label || ''; if (!lbl) continue;
+          var area = chart.chartArea || {right: chart.width-10};
+          if (x > area.right - 4) x = area.right - 4;
+          ctx.fillText(lbl, x, y);
+        }
+        ctx.restore();
       }catch(_){}
-    },
-    get(){ return Array.from(this.selected); }
-  };
-
-  // ---- 2) Helpers ----
-  function getState(){
-    try{
-      if (window.STATE && Array.isArray(STATE.months) && Array.isArray(STATE.cats)){
-        return { months: STATE.months.slice(), cats: STATE.cats.slice() };
-      }
-    }catch(_){}
-    try{
-      const s = document.getElementById('embeddedData');
-      if (s && s.textContent){
-        const p = JSON.parse(s.textContent);
-        if (p && Array.isArray(p.months) && Array.isArray(p.cats)){
-          return { months: p.months.slice(), cats: p.cats.slice() };
-        }
-      }
-    }catch(_){}
-    return { months: [], cats: [] };
-  }
-  function colorForSafe(name){
-    try{ if (typeof colorFor === 'function') return colorFor(name); }catch(_){}
-    const PALETTE = ['#2563eb','#10b981','#f59e0b','#ef4444','#8b5cf6','#14b8a6','#f97316','#22c55e','#eab308','#3b82f6','#6b7280','#0ea5e9'];
-    let h = 0; for (const ch of (name||'')) h = (h + ch.charCodeAt(0)) % 9973;
-    return PALETTE[h % PALETTE.length];
-  }
-  function findTrendChart(){
-    try{
-      if (window.charts && window.charts.allCatsTrend) return window.charts.allCatsTrend;
-      const byId = document.getElementById('trendAllCats') || document.getElementById('allCatsTrend');
-      if (byId && window.Chart && Chart.getChart){ const inst = Chart.getChart(byId); if (inst) return inst; }
-      // Fallback: search a line chart whose title includes "Tendencia ... GASTOS ... categoría"
-      if (window.Chart && Chart.instances){
-        const list = Object.values(Chart.instances || {});
-        for (const inst of list){
-          if (inst?.config?.type === 'line'){
-            const title = (inst?.options?.plugins?.title?.text||'').toString().toLowerCase();
-            const inDom = inst?.canvas && document.body.contains(inst.canvas);
-            if (inDom && /tendencia.*gastos.*categor/.test(title)) return inst;
-          }
-        }
-      }
-    }catch(_){}
-    return null;
-  }
-  function findStackedChart(){
-    try{
-      if (window.charts && window.charts.stackedByCat) return window.charts.stackedByCat;
-      // Try to identify a bar chart with stacked scales
-      if (window.Chart && Chart.instances){
-        const list = Object.values(Chart.instances || {});
-        for (const inst of list){
-          const o = inst?.options||{};
-          const isBar = inst?.config?.type === 'bar';
-          const stacked = (o.scales?.x?.stacked || o.scales?.y?.stacked);
-          const inDom = inst?.canvas && document.body.contains(inst.canvas);
-          if (isBar && stacked && inDom) return inst;
-        }
-      }
-    }catch(_){}
-    return null;
-  }
-
-  // ---- 3) Publisher: stacked -> FILTERS ----
-  function visibleNamesFromStacked(sc){
-    try{
-      const names = [];
-      const ds = sc?.data?.datasets || [];
-      for (let i=0;i<ds.length;i++){
-        const lab = (ds[i] && ds[i].label) ? (''+ds[i].label).trim() : '';
-        if (!lab) continue;
-        // Account for Chart.js v3/v4 meta.hidden vs isDatasetVisible
-        const visible = (typeof sc.isDatasetVisible === 'function')
-          ? sc.isDatasetVisible(i)
-          : !(sc.getDatasetMeta(i)?.hidden);
-        if (visible) names.push(lab);
-      }
-      return Array.from(new Set(names));
-    }catch(_){ return []; }
-  }
-  function publishFromStacked(){
-    const sc = findStackedChart();
-    if (!sc) return;
-    const names = visibleNamesFromStacked(sc);
-    if (names && names.length) window.FILTERS.set(names);
-  }
-
-  // ---- 4) Subscriber: trend listens to FILTERS ----
-  function applyToTrend(selected){
-    const tChart = findTrendChart();
-    if (!tChart) return;
-    const st = getState();
-    const want = (selected && selected.length) ? selected.slice() : st.cats.map(c=> c.name);
-    const sets = st.cats
-      .filter(c => want.includes(c.name||''))
-      .map(c => ({
-        label: c.name||'Categoría',
-        data: (c.monthly||[]).map(v => +v||0),
-        borderColor: colorForSafe(c.name),
-        backgroundColor: colorForSafe(c.name)+'33',
-        borderWidth: 2, fill: false, tension: .25
-      }));
-    tChart.data.labels = st.months.slice();
-    tChart.data.datasets = sets;
-    tChart.update();
-  }
-
-  // ---- 5) Wire: legend clicks & updates on stacked publish new selection ----
-  function hookStackedOnce(){
-    const sc = findStackedChart();
-    if (!sc || sc.__filtersHooked) return !!sc;
-    sc.__filtersHooked = true;
-
-    // Wrap update to re-publish
-    const origUpdate = sc.update?.bind ? sc.update.bind(sc) : null;
-    if (origUpdate){
-      sc.update = function(){
-        const r = origUpdate.apply(this, arguments);
-        try{ setTimeout(publishFromStacked, 0); }catch(_){}
-        return r;
-      };
     }
-
-    // Legend click -> toggle dataset visibility -> publish
-    sc.options.plugins = sc.options.plugins || {};
-    sc.options.plugins.legend = sc.options.plugins.legend || {};
-    const prevClick = sc.options.plugins.legend.onClick;
-    sc.options.plugins.legend.onClick = function(e, li, chart){
-      if (prevClick) prevClick(e, li, chart);
-      else {
-        const vis = chart.isDatasetVisible(li.datasetIndex);
-        chart.setDatasetVisibility(li.datasetIndex, !vis);
-        chart.update();
+  };
+  function registerEndLabelsOnce(){
+    try{
+      if (!window.Chart) return;
+      if (Chart.registry && !Chart.registry.plugins.get('endLabelsPlugin_scoped_v3')){
+        Chart.register(endLabelsPluginScoped);
       }
-      try{ setTimeout(publishFromStacked, 0); }catch(_){}
-    };
-    return true;
+    }catch(_){}
   }
 
-  // ---- 6) Checkboxes (si existen) publican ----
-  function wireCheckboxes(){
-    const box = document.getElementById('allCatsChecks');
-    if (!box || box.__filtersWired) return;
-    box.__filtersWired = true;
-    box.addEventListener('change', function(){
-      const sel = Array.from(box.querySelectorAll('input[type="checkbox"]:checked'))
-        .map(i => i.dataset.cat || i.value || i.name || '').filter(Boolean);
-      window.FILTERS.set(sel);
-    });
-    // Botones rápidos
-    ['allCatsTop5','allCatsTop10','allCatsAll','allCatsNone','allCatsApply'].forEach(id=>{
-      const el = document.getElementById(id);
-      if (el && !el.__filtersWired){
-        el.__filtersWired = true;
-        el.addEventListener('click', function(){ setTimeout(function(){ 
-          // tras cambiar selección en UI, recalculamos a partir de checkboxes
-          const sel = Array.from(box.querySelectorAll('input[type="checkbox"]:checked'))
-            .map(i => i.dataset.cat || i.value || i.name || '').filter(Boolean);
-          window.FILTERS.set(sel);
-        }, 30); });
-      }
-    });
+  // ---------- 5) Swap Trend <-> MoM sections ----------
+  function swapTrendAndMoM(){
+    var a=findTrendSection(), b=findMoMSection();
+    if (!a || !b) return;
+    if (a === b) return;
+    var parentA=a.parentNode, parentB=b.parentNode; if (!parentA || !parentB) return;
+    var refA=a.nextSibling, refB=b.nextSibling;
+    // swap via placeholder
+    var ph=document.createElement('div'); parentA.insertBefore(ph, refA);
+    parentB.insertBefore(a, refB);
+    parentA.insertBefore(b, ph);
+    ph.remove();
   }
 
-  // ---- 7) Trend subscriber ----
-  document.addEventListener('filters:change', function(e){
-    try{ applyToTrend(e.detail && e.detail.selected || []); }catch(_){}
-  });
-
-  // ---- 8) Boot: hook, wire, and initial publish ----
-  (function boot(){
-    let tries = 0;
+  function boot(){
+    // core wiring
+    wireOpenCopy();
+    wireExportPDF();
+    cleanTrendUI();
+    registerEndLabelsOnce();
+    // wait a bit for charts to exist before swapping/labeling
+    var tries=0;
     (function wait(){
       tries++;
-      wireCheckboxes();
-      const hooked = hookStackedOnce();
-      if (hooked){
-        // Publica lo que esté visible en el apilado como primer filtro
-        setTimeout(publishFromStacked, 150);
+      var cv=findTrendCanvas();
+      if (cv){
+        swapTrendAndMoM();
+        // trigger a bit later so chart recomputes after DOM move
+        setTimeout(function(){
+          try{
+            if (window.Chart && Chart.getChart){
+              var ch=Chart.getChart(cv); if (ch) ch.update();
+            }
+          }catch(_){}
+        }, 200);
+        return;
       }
-      // Si aún no está todo listo, sigue intentando un rato
-      if (tries < 60) setTimeout(wait, 300);
+      if (tries<60) setTimeout(wait, 250);
     })();
-  })();
+  }
 
-  // safety: si nada publica, fuerza "todas" a los 3s
-  setTimeout(function(){
-    if (!window.FILTERS.get().length){
-      const st = getState();
-      window.FILTERS.set(st.cats.map(c=> c.name).slice(0, 12)); // por ergonomía, máx 12
-    }
-  }, 3000);
+  if (document.readyState==='loading'){ document.addEventListener('DOMContentLoaded', boot); } else { boot(); }
 })();
 </script>
 
+
+
+
+
+<script id="jle-trend-below-js">
+(function(){
+  function norm(t){ return (t||'').toLowerCase().replace(/\s+/g,' ').trim(); }
+  function findTrendSection(){
+    var hs=document.querySelectorAll('h1,h2,h3,h4,h5');
+    for (var i=0;i<hs.length;i++){
+      var txt=norm(hs[i].textContent||'');
+      if (txt.includes('tendencia') && txt.includes('gastos') && txt.includes('categor') && txt.includes('(todas)')){
+        return hs[i].closest('section, .card, .panel, .chart, .box, .container, div') || hs[i].parentElement;
+      }
+    }
+    return null;
+  }
+  function findCanvas(sec){
+    if (!sec) return null;
+    var cv = sec.querySelector('canvas'); if (cv) return cv;
+    return document.getElementById('trendAllCats') || document.getElementById('allCatsTrend') || null;
+  }
+  function getChart(cv){ return (window.Chart && Chart.getChart) ? (Chart.getChart(cv) || null) : null; }
+  function colorOf(ds){ var c=ds.borderColor||ds.backgroundColor||'#888'; return Array.isArray(c)?c[0]:c; }
+
+  function ensureBelow(){
+    var sec=findTrendSection(); if (!sec) return null;
+    if (sec.__trendBelowReady) return sec;
+    var cv=findCanvas(sec); if (!cv) return null;
+
+    var wrap=document.createElement('div'); wrap.className='trend-below-wrap';
+    // Insert *after* the canvas
+    if (cv.nextSibling) cv.parentNode.insertBefore(wrap, cv.nextSibling);
+    else cv.parentNode.appendChild(wrap);
+
+    var tog=document.createElement('button'); tog.type='button'; tog.className='trend-below-toggle';
+    tog.innerHTML='Categorías (checklist) ▾';
+    wrap.appendChild(tog);
+
+    var panel=document.createElement('div'); panel.className='trend-below-panel'; panel.id='trendBelowPanel';
+    panel.innerHTML=''+
+      '<div class="trend-dd-head">'+
+      '<button class="btn" id="trendAllOn">Todas</button>'+
+      '<button class="btn" id="trendAllOff">Ninguna</button>'+
+      '<button class="btn" id="trendTop8">Top 8</button>'+
+      '<input type="search" id="trendSearch" placeholder="Buscar...">'+
+      '</div>'+
+      '<table id="trendCatTable"></table>'+
+      '<div class="trend-meta" id="trendMeta"></div>';
+    wrap.appendChild(panel);
+
+    tog.addEventListener('click', function(ev){
+      ev.preventDefault();
+      var open = !panel.classList.contains('open');
+      panel.classList.toggle('open', open);
+      tog.setAttribute('aria-expanded', open ? 'true' : 'false');
+    });
+
+    sec.__trendBelowReady = true;
+    return sec;
+  }
+
+  function rebuildTable(){
+    var sec=findTrendSection(); if (!sec) return;
+    var cv=findCanvas(sec); var ch=getChart(cv); if (!ch) return;
+    var tbl=sec.querySelector('#trendCatTable'); if (!tbl) return;
+    var meta=sec.querySelector('#trendMeta');
+    var sets=(ch.data && ch.data.datasets) || [];
+    var order=sets.map(function(ds,i){
+      var s=0; (ds.data||[]).forEach(function(v){ if (!isNaN(+v)) s+=+v; });
+      return {i:i,t:s};
+    }).sort(function(a,b){ return b.t-a.t; }).map(function(x){ return x.i; });
+
+    tbl.innerHTML='';
+    var visible=0;
+    order.forEach(function(i){
+      var ds=sets[i];
+      var tr=document.createElement('tr'); tr.dataset.index=i;
+
+      var chkTd=document.createElement('td'); chkTd.className='chk';
+      var chk=document.createElement('input'); chk.type='checkbox';
+      var isVis=(typeof ch.isDatasetVisible==='function') ? ch.isDatasetVisible(i) : !(ch.getDatasetMeta(i)?.hidden);
+      chk.checked=!!isVis;
+      chk.addEventListener('click', function(ev){
+        ev.stopPropagation();
+        var idx=+tr.dataset.index;
+        if (ch.setDatasetVisibility) ch.setDatasetVisibility(idx, this.checked);
+        else ch.getDatasetMeta(idx).hidden=!this.checked;
+        ch.update(); rebuildTable();
+      });
+      chkTd.appendChild(chk);
+
+      var swTd=document.createElement('td'); swTd.className='sw';
+      var sw=document.createElement('span'); sw.className='trend-swatch'; sw.style.borderColor=colorOf(ds);
+      swTd.appendChild(sw);
+
+      var nmTd=document.createElement('td'); nmTd.textContent=ds.label || ('Serie '+(i+1));
+      nmTd.addEventListener('click', function(ev){
+        var idx=+tr.dataset.index;
+        if (ev.shiftKey){
+          (ch.data.datasets||[]).forEach(function(_,k){
+            if (ch.setDatasetVisibility) ch.setDatasetVisibility(k, k===idx);
+            else ch.getDatasetMeta(k).hidden=(k!==idx);
+          });
+        }else{
+          var current=(typeof ch.isDatasetVisible==='function') ? ch.isDatasetVisible(idx) : !(ch.getDatasetMeta(idx)?.hidden);
+          if (ch.setDatasetVisibility) ch.setDatasetVisibility(idx, !current);
+          else ch.getDatasetMeta(idx).hidden=current;
+        }
+        ch.update(); rebuildTable();
+      });
+
+      tr.appendChild(chkTd); tr.appendChild(swTd); tr.appendChild(nmTd);
+      if (!isVis) tr.classList.add('off'); else visible++;
+      tbl.appendChild(tr);
+    });
+    if (meta) meta.textContent='Mostrando '+visible+' / '+sets.length;
+
+    var search=sec.querySelector('#trendSearch');
+    if (search && !search.__wired){
+      search.__wired=true;
+      search.addEventListener('input', function(){
+        var q=norm(search.value);
+        tbl.querySelectorAll('tr').forEach(function(tr){
+          var name=norm(tr.cells[2]?.textContent || '');
+          tr.style.display = q ? (name.indexOf(q)>=0 ? '' : 'none') : '';
+        });
+      });
+    }
+    var btnOn=sec.querySelector('#trendAllOn'), btnOff=sec.querySelector('#trendAllOff'), btnTop=sec.querySelector('#trendTop8');
+    if (btnOn && !btnOn.__wired){
+      btnOn.__wired=true; btnOn.addEventListener('click', function(){
+        (ch.data.datasets||[]).forEach(function(_,k){
+          if (ch.setDatasetVisibility) ch.setDatasetVisibility(k, true);
+          else ch.getDatasetMeta(k).hidden=false;
+        }); ch.update(); rebuildTable();
+      });
+    }
+    if (btnOff && !btnOff.__wired){
+      btnOff.__wired=true; btnOff.addEventListener('click', function(){
+        (ch.data.datasets||[]).forEach(function(_,k){
+          if (ch.setDatasetVisibility) ch.setDatasetVisibility(k, false);
+          else ch.getDatasetMeta(k).hidden=true;
+        }); ch.update(); rebuildTable();
+      });
+    }
+    if (btnTop && !btnTop.__wired){
+      btnTop.__wired=true; btnTop.addEventListener('click', function(){
+        order.forEach(function(i,k){
+          if (ch.setDatasetVisibility) ch.setDatasetVisibility(i, k<8);
+          else ch.getDatasetMeta(i).hidden=!(k<8);
+        }); ch.update(); rebuildTable();
+      });
+    }
+  }
+
+  function boot(){
+    var tries=0;
+    (function wait(){
+      tries++;
+      var sec=ensureBelow();
+      if (sec){
+        var cv=findCanvas(sec); var ch=getChart(cv);
+        if (ch){
+          rebuildTable();
+          if (!ch.__belowPanelHooked){
+            ch.__belowPanelHooked=true;
+            var orig=ch.update.bind(ch);
+            ch.update=function(){
+              var r=orig.apply(this, arguments);
+              try{ rebuildTable(); }catch(_){}
+              return r;
+            };
+          }
+          return;
+        }
+      }
+      if (tries<80) setTimeout(wait, 250);
+    })();
+  }
+  if (document.readyState==='loading'){ document.addEventListener('DOMContentLoaded', boot); } else { boot(); }
+})();
+</script>
+
+
+
+
+<script id="jle-external-legend-js">
+(function(){
+  function norm(t){ return (t||'').toLowerCase().replace(/\s+/g,' ').trim(); }
+  function findTrendSection(){
+    var hs=document.querySelectorAll('h1,h2,h3,h4,h5');
+    for (var i=0;i<hs.length;i++){
+      var txt=norm(hs[i].textContent||'');
+      if (txt.includes('tendencia') && txt.includes('gastos') && txt.includes('categor') && txt.includes('(todas)')){
+        return hs[i].closest('section, .card, .panel, .chart, .box, .container, div') || hs[i].parentElement;
+      }
+    }
+    return null;
+  }
+  function findCanvas(sec){
+    if (!sec) return null;
+    var cv = sec.querySelector('canvas'); if (cv) return cv;
+    return document.getElementById('trendAllCats') || document.getElementById('allCatsTrend') || null;
+  }
+  function getChart(cv){ return (window.Chart && Chart.getChart) ? (Chart.getChart(cv) || null) : null; }
+  function colorOf(ds){ var c = ds.borderColor || ds.backgroundColor || '#888'; return Array.isArray(c) ? c[0] : c; }
+
+  function pickEmoji(nameRaw){
+    var t = norm(nameRaw);
+    if (/mileage\s*\/?\s*travel|mileage|travel/.test(t)) return '🚗';
+    if (/office\s*expenses?/.test(t)) return '📝';
+    if (/medical|dental|vision|life/.test(t)) return '🩺';
+    if (/(nomina|nómina|sueld|salari|personal|staff|emplead|payroll)/.test(t)) return '👥';
+    if (/(renta|alquiler|arrend|lease|oficina|instalaci|rent)/.test(t)) return '🏢';
+    if (/(luz|electric|agua|gas|utilit|servicio|internet|telefon|utilities)/.test(t)) return '💡';
+    if (/(transp|viaje|viatico|gasolin|combust|movilidad|autobus|avion|taxi)/.test(t)) return '🚗';
+    if (/(comida|alimento|catering|cafeter|restaurante|despensa|meals|food)/.test(t)) return '🍽️';
+    if (/(suministro|papeler|oficina|material|insumo|consumible|supplies)/.test(t)) return '📝';
+    if (/(software|licenc|it|ti|tecnolog|sistemas|nube|cloud)/.test(t)) return '💻';
+    if (/(mantenim|repar|soporte|servicio tecn|maintenance)/.test(t)) return '🛠️';
+    if (/(seguro|insurance)/.test(t)) return '🛡️';
+    if (/(marketing|publicidad|comunicaci|difusion|promoci)/.test(t)) return '📣';
+    if (/(evento|feria|congreso|taller|reunion|event)/.test(t)) return '🎉';
+    if (/(capacit|formaci|entrenam|educaci|beca|scholar|training)/.test(t)) return '🎓';
+    if (/(impuesto|tax|contribuci|tasas|derechos)/.test(t)) return '🧾';
+    if (/(envio|paqueter|mensajer|correos|shipping|post)/.test(t)) return '📦';
+    if (/(salud|seguridad|higiene|ppe|health)/.test(t)) return '🩺';
+    return '🔹';
+  }
+
+  function ensureExternalCard(){
+    var sec = findTrendSection(); if (!sec) return null;
+    if (sec.__extLegendReady) return sec;
+    var card = document.createElement('div');
+    card.className = 'ext-trend-legend-card';
+    card.innerHTML = '<h4>Leyenda de categorías (independiente)</h4><table class="ext-legend-list" id="extLegendList"></table>';
+    if (sec.nextSibling) sec.parentNode.insertBefore(card, sec.nextSibling);
+    else sec.parentNode.appendChild(card);
+    sec.__extLegendReady = true;
+    return sec;
+  }
+
+  function rebuildLegend(){
+    var sec = findTrendSection(); if (!sec) return;
+    var cv = findCanvas(sec); var ch = getChart(cv); if (!ch) return;
+    var tbl = sec.parentNode.querySelector('#extLegendList'); if (!tbl) return;
+    var sets = (ch.data && ch.data.datasets) || [];
+    tbl.innerHTML = '';
+    for (var i=0;i<sets.length;i++){
+      var ds = sets[i];
+      var tr = document.createElement('tr');
+      var tdEmo = document.createElement('td'); tdEmo.className='emo'; tdEmo.textContent = pickEmoji(ds.label || '');
+      var tdSw  = document.createElement('td'); tdSw.className='sw';
+      var sw = document.createElement('span'); sw.className='ext-legend-swatch'; sw.style.borderColor = colorOf(ds);
+      tdSw.appendChild(sw);
+      var tdName = document.createElement('td'); tdName.textContent = ds.label || ('Serie '+(i+1));
+      tr.appendChild(tdEmo); tr.appendChild(tdSw); tr.appendChild(tdName);
+      tbl.appendChild(tr);
+    }
+  }
+
+  function boot(){
+    var tries = 0;
+    (function wait(){
+      tries++;
+      var sec = ensureExternalCard();
+      if (sec){
+        var cv = findCanvas(sec); var ch = getChart(cv);
+        if (ch){
+          rebuildLegend();
+          if (!ch.__extLegendHooked){
+            ch.__extLegendHooked = true;
+            var orig = ch.update.bind(ch);
+            ch.update = function(){
+              var r = orig.apply(this, arguments);
+              try{ rebuildLegend(); }catch(_){}
+              return r;
+            };
+          }
+          return;
+        }
+      }
+      if (tries < 80) setTimeout(wait, 250);
+    })();
+  }
+
+  if (document.readyState === 'loading'){ document.addEventListener('DOMContentLoaded', boot); } else { boot(); }
+})();
+</script>
 </body>
 </html>
