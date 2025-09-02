@@ -4646,6 +4646,13 @@ canvas, .card, .panel, .chart, .exec-card, #execWrap, #charts, #charts3, #kpi, [
 }
 
 </style>
+
+<style id="jle-branding">
+  .brand-bar{display:flex;align-items:center;gap:.75rem;padding:.6rem 1rem;border-bottom:1px solid #1f2937;background:#0b0f19;position:sticky;top:0;z-index:50}
+  .brand-title{font-family:system-ui,Segoe UI,Arial;font-size:16px;color:#e5e7eb;font-weight:600}
+  @media print{ .brand-bar{display:none !important;} }
+</style>
+
 </head>
 <body>
 <script id="embeddedData" type="application/json"></script>
@@ -6689,178 +6696,69 @@ function autoApplyAllCats(force=false){
 
 
 
-<script id="jle-donut-tooltip-percent">
+<script id="jle-trend-filters-fix">
 (function(){
-  function patch(){
-    if (!window.Chart){ setTimeout(patch, 300); return; }
-    const prev = (Chart.defaults.plugins.tooltip && Chart.defaults.plugins.tooltip.callbacks && Chart.defaults.plugins.tooltip.callbacks.label) || null;
-    Chart.defaults.plugins = Chart.defaults.plugins || {};
-    Chart.defaults.plugins.tooltip = Chart.defaults.plugins.tooltip || {};
-    Chart.defaults.plugins.tooltip.callbacks = Chart.defaults.plugins.tooltip.callbacks || {};
-    Chart.defaults.plugins.tooltip.callbacks.label = function(ctx){
-      try{
-        const type = ctx.chart?.config?.type;
-        if (type === 'doughnut' || type === 'pie'){
-          const ds = ctx.dataset?.data || [];
-          const total = ds.reduce((a,b)=> a + (+b||0), 0) || 1;
-          const val = +ctx.parsed || 0;
-          const pct = val/total*100;
-          const valStr = new Intl.NumberFormat('en-US',{style:'currency',currency:'USD',maximumFractionDigits:0}).format(val);
-          const name = ctx.label || '';
-          return `${name}: ${valStr} (${pct.toFixed(1)}%)`;
-        }
-      }catch(_){}
-      if (typeof prev === 'function'){ return prev(ctx); }
-      const name = ctx.label || '';
-      return `${name}: ${ctx.parsed}`;
-    };
-  }
-  if (document.readyState === 'loading'){ document.addEventListener('DOMContentLoaded', patch); } else { patch(); }
-  setTimeout(patch, 1200);
-})();
-</script>
-
-<script id="jle-pptx-export-pro">
-(function(){
-  function ensurePptx(cb){
-    if (window.PptxGenJS){ cb(); return; }
-    var urls = [
-      "https://cdn.jsdelivr.net/npm/pptxgenjs@3.12.0/dist/pptxgen.bundle.js",
-      "https://unpkg.com/pptxgenjs@3.12.0/dist/pptxgen.bundle.js",
-      "https://cdn.jsdelivr.net/gh/gitbrent/PptxGenJS@3.12.0/dist/pptxgen.bundle.js"
-    ];
-    var i = 0;
-    function tryNext(){
-      if (window.PptxGenJS){ cb(); return; }
-      if (i>=urls.length){ alert("No se pudo cargar PptxGenJS. Revisa tu conexión a internet."); return; }
-      var s = document.createElement('script');
-      s.src = urls[i++]; s.async = true;
-      s.onload = function(){ setTimeout(function(){ if (window.PptxGenJS){ cb(); } else { tryNext(); } }, 100); };
-      s.onerror = tryNext;
-      document.head.appendChild(s);
-    }
-    tryNext();
-  }
-  function getText(el){ return (el && (el.textContent||"").trim()) || ""; }
-  function firstText(arr){ for (var i=0;i<arr.length;i++){ var t=getText(document.querySelector(arr[i])); if (t) return t; } return ""; }
-  function getExecBullets(){ var out=[]; var b=document.querySelector("#execBullets"); if(!b) return out; b.querySelectorAll("li").forEach(li=>{var t=(li.textContent||"").trim(); if(t) out.push(t);}); return out.slice(0,10); }
-  function getKpiTableData(){
-    var tbl=document.querySelector(".kpi-table, #kpiTable, table.kpi");
-    if(!tbl) return null;
-    var rows=[]; tbl.querySelectorAll("tr").forEach(tr=>{
-      var row=[]; tr.querySelectorAll("th,td").forEach(td=> row.push((td.innerText||"").replace(/\s+\n/g," ").replace(/\n+/g," ").trim())); 
-      if(row.length) rows.push(row);
-    });
-    if(!rows.length) return null;
-    var maxCols = rows.reduce((m,r)=>Math.max(m,r.length),0);
-    rows = rows.map(r=>{ while(r.length<maxCols) r.push(""); return r; });
-    return rows;
-  }
-  function dataUrlFromCanvasNear(regex, nthFallback){
-    var heads = Array.from(document.querySelectorAll('h1,h2,h3,h4'));
-    for (var i=0;i<heads.length;i++){
-      var t=(heads[i].textContent||"").toLowerCase();
-      if (regex.test(t)){
-        var cont=heads[i].closest('section, .card, .panel, .chart, div')||heads[i].parentElement;
-        var cv=cont?cont.querySelector('canvas'):null;
-        if (cv){ try{return cv.toDataURL("image/png");}catch(e){} }
-      }
-    }
-    var cvs=document.querySelectorAll('canvas');
-    if(cvs && cvs[nthFallback||0]){ try{return cvs[nthFallback||0].toDataURL("image/png");}catch(e){} }
+  function getPayload(){
+    try{ if (window.STATE && Array.isArray(STATE.cats) && Array.isArray(STATE.months)) return { months: STATE.months, cats: STATE.cats }; }catch(_){}
+    try{ const s=document.getElementById('embeddedData'); if(s&&s.textContent){ const p=JSON.parse(s.textContent); if(p&&Array.isArray(p.cats)&&Array.isArray(p.months)) return {months:p.months,cats:p.cats}; } }catch(_){}
     return null;
   }
-  function formatNow(){ var d=new Date(); var p=n=> (n<10?"0":"")+n; return d.getFullYear()+"-"+p(d.getMonth()+1)+"-"+p(d.getDate())+"_"+p(d.getHours())+p(d.getMinutes()); }
-  function buildPpt(){
-    var pptx = new PptxGenJS(); pptx.layout="LAYOUT_16x9";
-    var brand={ bg:"FFFFFF", dark:"111827", mid:"374151", accent:"2563EB" }, margin=0.5;
-    var titleFont={ fontFace:"Segoe UI", color:brand.dark, fontSize:28, bold:true };
-    var h2Font={ fontFace:"Segoe UI", color:brand.mid, fontSize:16, bold:true };
-    var bodyFont={ fontFace:"Segoe UI", color:brand.dark, fontSize:12 };
-
-    var docTitle = firstText(["h1",".title","#title"]) || "Reporte de Gastos";
-    var subTitle = firstText(["#subTitle",".subtitle","#dateRange",".date-range"]) || "Resumen ejecutivo";
-
-    var s1=pptx.addSlide({bkgd:brand.bg});
-    s1.addShape(pptx.ShapeType.rect,{x:0,y:0,w:10,h:0.25,fill:{color:brand.accent}});
-    s1.addText(docTitle,{x:margin,y:1.0,w:10-2*margin,h:1,...titleFont});
-    s1.addText(subTitle,{x:margin,y:1.8,w:10-2*margin,h:0.5,...h2Font});
-    s1.addText("Generado: "+formatNow(),{x:margin,y:2.3,w:10-2*margin,h:0.3,fontFace:"Segoe UI",fontSize:10,color:"6B7280"});
-
-    var bullets=getExecBullets();
-    if(bullets.length){
-      var s2=pptx.addSlide({bkgd:brand.bg});
-      s2.addText("Análisis Ejecutivo",{x:margin,y:margin,w:10-2*margin,h:0.5,...h2Font});
-      s2.addText(bullets,{x:margin,y:1.0,w:10-2*margin,h:5.0,...bodyFont,bullet:true,lineSpacingMultiple:1.1});
-    }
-
-    var donut=dataUrlFromCanvasNear(/distribuci[oó]n.*gastos|dona/i,0);
-    var stacked=dataUrlFromCanvasNear(/apilado|stacked|por mes/i,1);
-    if(donut || stacked){
-      var s3=pptx.addSlide({bkgd:brand.bg});
-      s3.addText("Gráficas clave",{x:margin,y:margin,w:10-2*margin,h:0.5,...h2Font});
-      var y=1.0, w=10-2*margin, h=3.5;
-      if(donut && stacked){
-        s3.addImage({data:donut,x:margin,y:y,w:w,h:h});
-        s3.addImage({data:stacked,x:margin,y:y+h+0.2,w:w,h:h});
-      }else if(donut){
-        s3.addImage({data:donut,x:margin,y:y,w:w,h:h+1.5});
-      }else{
-        s3.addImage({data:stacked,x:margin,y:y,w:w,h:h+1.5});
+  function findTrendCanvas(){
+    const heads=Array.from(document.querySelectorAll('h1,h2,h3,h4'));
+    for(const h of heads){
+      const t=(h.textContent||'').toLowerCase();
+      if(/tendencia.*gastos.*categor/.test(t)){
+        const sec=h.closest('section, .card, .panel, .chart, div')||h.parentElement;
+        const cv=sec?sec.querySelector('canvas'):null;
+        if(cv) return cv;
       }
     }
-
-    var kpi=getKpiTableData();
-    if(kpi && kpi.length){
-      var s4=pptx.addSlide({bkgd:brand.bg});
-      s4.addText("Resumen KPI por categoría",{x:margin,y:margin,w:10-2*margin,h:0.5,...h2Font});
-      var colW=(10-2*margin)/kpi[0].length;
-      var colWArr=new Array(kpi[0].length).fill(colW);
-      s4.addTable(kpi,{
-        x:margin,y:1.0,w:10-2*margin,colW:colWArr,
-        border:{type:"solid",color:"E5E7EB",pt:1},
-        fontFace:"Segoe UI",fontSize:10,color:brand.dark,fill:"FFFFFF",
-        tableHead:[{fill:"F3F4F6",color:brand.dark,bold:true}]
-      });
-    }
-
-    var s5=pptx.addSlide({bkgd:brand.bg});
-    s5.addText("Comentarios / Próximos pasos",{x:margin,y:margin,w:10-2*margin,h:0.5,...h2Font});
-    s5.addText(["• Ajustar proyecciones según tendencia real","• Revisar categorías con mayor variación MoM","• Verificar gastos indirectos y top 5"],{x:margin,y:1.0,w:10-2*margin,h:3.5,...bodyFont,bullet:true});
-    s5.addText("CBDIO • Finanzas",{x:margin,y:6.5,w:10-2*margin,h:0.3,fontFace:"Segoe UI",fontSize:10,color:"6B7280",align:"right"});
-
-    var fname = (typeof buildExportFilename==='function'? buildExportFilename('pptx') : ("CBDIO_Reporte_Gastos_"+formatNow()+".pptx"));
-    pptx.writeFile({fileName: fname});
+    const cvs=Array.from(document.querySelectorAll('canvas'));
+    return cvs[0]||null;
   }
-  window.onExportPPTX = function(){ ensurePptx(buildPpt); };
-  function wire(){
-    var b=document.getElementById("btnExportPPTX");
-    if(b && !b.__wiredPPTX){ b.__wiredPPTX=true; b.addEventListener("click", function(ev){ ev.preventDefault(); window.onExportPPTX(); }); b.style.display="inline-block"; }
-  }
-  if(document.readyState==="loading"){ document.addEventListener("DOMContentLoaded", wire); } else { wire(); }
-  setTimeout(wire,1000);
-})();
-</script>
-
-<script id="jle-freeze-open-clean">
-(function(){
-  // Clean override that opens snapshot in new tab; does not touch existing scripts
-  window.onFreezeHTML = function(){
-    try{
-      var frozen = (typeof freezeDomClone==='function') ? freezeDomClone() : ('<!DOCTYPE html><html><body><p>Snapshot no disponible.</p></body></html>');
-      var w = window.open('about:blank','_blank');
-      if (!w){ alert('Permite pop-ups para abrir el snapshot.'); return; }
-      w.document.write('<!DOCTYPE html><html><head><meta charset="utf-8"><title>Abriendo snapshot…</title></head><body><p style="font-family:system-ui,Segoe UI,Arial;">Abriendo snapshot…</p></body></html>');
-      w.document.close();
-      var blob = new Blob([frozen], {type:'text/html'});
-      var url = URL.createObjectURL(blob);
-      w.location = url;
-      setTimeout(function(){ URL.revokeObjectURL(url); }, 60000);
-    }catch(e){
-      console.warn('onFreezeHTML (open) failed', e);
-      alert('No se pudo abrir el HTML congelado.');
+  function getSelectedCategories(allNames){
+    const names=new Set();
+    const boxes=Array.from(document.querySelectorAll('input[type="checkbox"]'));
+    for(const b of boxes){
+      if(!b.checked) continue;
+      let label=""; const id = b.id && document.querySelector(`label[for="${b.id}"]`);
+      if(id) label=(id.textContent||"").trim();
+      else if(b.closest('label')) label=(b.closest('label').textContent||"").trim();
+      if(!label) label=(b.value||b.name||b.title||"").trim();
+      if(label) names.add(label);
     }
-  };
+    const selects=Array.from(document.querySelectorAll('select[multiple], select[name*="cat"]'));
+    for(const s of selects){ for(const opt of Array.from(s.selectedOptions||[])){ names.add((opt.text||opt.value||"").trim()); } }
+    if(!names.size) return allNames.slice();
+    const selected=[]; const lower=allNames.map(n=>({n,k:n.toLowerCase()}));
+    names.forEach(lbl=>{ const L=lbl.toLowerCase(); let hit=lower.find(x=>x.k===L)||lower.find(x=>x.k.startsWith(L))||lower.find(x=>L.startsWith(x.k)); if(hit) selected.push(hit.n); });
+    return selected.length?selected:allNames.slice();
+  }
+  function buildDatasets(cats, selected){
+    const ds=[]; const palette=['#2563eb','#10b981','#f59e0b','#ef4444','#8b5cf6','#14b8a6','#f97316','#22c55e','#eab308','#3b82f6']; let i=0;
+    selected.forEach(name=>{ const c=cats.find(x=>(x.name||'')===name); if(!c) return;
+      ds.push({ label:c.name||'Categoría', data:(c.monthly||[]).map(v=>+v||0), borderColor:palette[i%palette.length], backgroundColor:palette[i%palette.length]+'55', borderWidth:2, tension:.25, fill:false });
+      i++;
+    });
+    return ds;
+  }
+  function redrawTrend(){
+    const payload=getPayload(); if(!payload) return;
+    const cv=findTrendCanvas(); if(!cv) return;
+    const allNames=payload.cats.map(c=>c.name||'Categoría');
+    const selected=getSelectedCategories(allNames);
+    if(window.Chart&&Chart.getChart){ const inst=Chart.getChart(cv); if(inst&&inst.destroy) inst.destroy(); }
+    const ctx=cv.getContext('2d');
+    new Chart(ctx,{ type:'line', data:{ labels:payload.months.slice(), datasets:buildDatasets(payload.cats, selected) },
+      options:{ responsive:true, interaction:{mode:'nearest',intersect:false}, plugins:{legend:{position:'bottom'}}, scales:{ y:{beginAtZero:true} } } });
+  }
+  function wireFilters(){
+    const els=Array.from(document.querySelectorAll('input[type="checkbox"], select'));
+    els.forEach(el=>{ if(!el.__wiredTrend){ el.__wiredTrend=true; el.addEventListener('change', ()=> setTimeout(redrawTrend,10)); } });
+  }
+  function boot(){ wireFilters(); setTimeout(redrawTrend,50); }
+  if(document.readyState==='loading'){ document.addEventListener('DOMContentLoaded', boot); } else { boot(); }
+  setTimeout(wireFilters,800); setTimeout(wireFilters,1600);
 })();
 </script>
 
