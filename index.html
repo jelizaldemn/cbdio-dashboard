@@ -4647,15 +4647,11 @@ canvas, .card, .panel, .chart, .exec-card, #execWrap, #charts, #charts3, #kpi, [
 
 </style>
 
-<style id="jle-branding">
-  .brand-bar{display:flex;align-items:center;gap:.75rem;padding:.6rem 1rem;border-bottom:1px solid #1f2937;background:#0b0f19;position:sticky;top:0;z-index:50}
-  .brand-title{font-family:system-ui,Segoe UI,Arial;font-size:16px;color:#e5e7eb;font-weight:600}
-  @media print{ .brand-bar{display:none !important;} }
-</style>
+
 
 </head>
 <body>
-<div class="brand-bar"><img src="logo_cbdio.jpeg" alt="CBDIO"><div class="brand-title">CBDIO • Dashboard de Gastos</div></div>
+</div>
 
 <script id="embeddedData" type="application/json"></script>
 
@@ -6698,69 +6694,222 @@ function autoApplyAllCats(force=false){
 
 
 
-<script id="jle-trend-filters-fix">
+
+
+
+
+
+
+
+
+
+
+
+
+<script id="jle-filters-bus-sync">
 (function(){
-  function getPayload(){
-    try{ if (window.STATE && Array.isArray(STATE.cats) && Array.isArray(STATE.months)) return { months: STATE.months, cats: STATE.cats }; }catch(_){}
-    try{ const s=document.getElementById('embeddedData'); if(s&&s.textContent){ const p=JSON.parse(s.textContent); if(p&&Array.isArray(p.cats)&&Array.isArray(p.months)) return {months:p.months,cats:p.cats}; } }catch(_){}
+  // ---- 1) Global FILTERS store ----
+  window.FILTERS = window.FILTERS || {
+    selected: new Set(),
+    set(arr){
+      this.selected = new Set((arr||[]).filter(Boolean));
+      try{
+        document.dispatchEvent(new CustomEvent('filters:change', { detail: { selected: Array.from(this.selected) } }));
+      }catch(_){}
+    },
+    get(){ return Array.from(this.selected); }
+  };
+
+  // ---- 2) Helpers ----
+  function getState(){
+    try{
+      if (window.STATE && Array.isArray(STATE.months) && Array.isArray(STATE.cats)){
+        return { months: STATE.months.slice(), cats: STATE.cats.slice() };
+      }
+    }catch(_){}
+    try{
+      const s = document.getElementById('embeddedData');
+      if (s && s.textContent){
+        const p = JSON.parse(s.textContent);
+        if (p && Array.isArray(p.months) && Array.isArray(p.cats)){
+          return { months: p.months.slice(), cats: p.cats.slice() };
+        }
+      }
+    }catch(_){}
+    return { months: [], cats: [] };
+  }
+  function colorForSafe(name){
+    try{ if (typeof colorFor === 'function') return colorFor(name); }catch(_){}
+    const PALETTE = ['#2563eb','#10b981','#f59e0b','#ef4444','#8b5cf6','#14b8a6','#f97316','#22c55e','#eab308','#3b82f6','#6b7280','#0ea5e9'];
+    let h = 0; for (const ch of (name||'')) h = (h + ch.charCodeAt(0)) % 9973;
+    return PALETTE[h % PALETTE.length];
+  }
+  function findTrendChart(){
+    try{
+      if (window.charts && window.charts.allCatsTrend) return window.charts.allCatsTrend;
+      const byId = document.getElementById('trendAllCats') || document.getElementById('allCatsTrend');
+      if (byId && window.Chart && Chart.getChart){ const inst = Chart.getChart(byId); if (inst) return inst; }
+      // Fallback: search a line chart whose title includes "Tendencia ... GASTOS ... categoría"
+      if (window.Chart && Chart.instances){
+        const list = Object.values(Chart.instances || {});
+        for (const inst of list){
+          if (inst?.config?.type === 'line'){
+            const title = (inst?.options?.plugins?.title?.text||'').toString().toLowerCase();
+            const inDom = inst?.canvas && document.body.contains(inst.canvas);
+            if (inDom && /tendencia.*gastos.*categor/.test(title)) return inst;
+          }
+        }
+      }
+    }catch(_){}
     return null;
   }
-  function findTrendCanvas(){
-    const heads=Array.from(document.querySelectorAll('h1,h2,h3,h4'));
-    for(const h of heads){
-      const t=(h.textContent||'').toLowerCase();
-      if(/tendencia.*gastos.*categor/.test(t)){
-        const sec=h.closest('section, .card, .panel, .chart, div')||h.parentElement;
-        const cv=sec?sec.querySelector('canvas'):null;
-        if(cv) return cv;
+  function findStackedChart(){
+    try{
+      if (window.charts && window.charts.stackedByCat) return window.charts.stackedByCat;
+      // Try to identify a bar chart with stacked scales
+      if (window.Chart && Chart.instances){
+        const list = Object.values(Chart.instances || {});
+        for (const inst of list){
+          const o = inst?.options||{};
+          const isBar = inst?.config?.type === 'bar';
+          const stacked = (o.scales?.x?.stacked || o.scales?.y?.stacked);
+          const inDom = inst?.canvas && document.body.contains(inst.canvas);
+          if (isBar && stacked && inDom) return inst;
+        }
       }
-    }
-    const cvs=Array.from(document.querySelectorAll('canvas'));
-    return cvs[0]||null;
+    }catch(_){}
+    return null;
   }
-  function getSelectedCategories(allNames){
-    const names=new Set();
-    const boxes=Array.from(document.querySelectorAll('input[type="checkbox"]'));
-    for(const b of boxes){
-      if(!b.checked) continue;
-      let label=""; const id = b.id && document.querySelector(`label[for="${b.id}"]`);
-      if(id) label=(id.textContent||"").trim();
-      else if(b.closest('label')) label=(b.closest('label').textContent||"").trim();
-      if(!label) label=(b.value||b.name||b.title||"").trim();
-      if(label) names.add(label);
-    }
-    const selects=Array.from(document.querySelectorAll('select[multiple], select[name*="cat"]'));
-    for(const s of selects){ for(const opt of Array.from(s.selectedOptions||[])){ names.add((opt.text||opt.value||"").trim()); } }
-    if(!names.size) return allNames.slice();
-    const selected=[]; const lower=allNames.map(n=>({n,k:n.toLowerCase()}));
-    names.forEach(lbl=>{ const L=lbl.toLowerCase(); let hit=lower.find(x=>x.k===L)||lower.find(x=>x.k.startsWith(L))||lower.find(x=>L.startsWith(x.k)); if(hit) selected.push(hit.n); });
-    return selected.length?selected:allNames.slice();
+
+  // ---- 3) Publisher: stacked -> FILTERS ----
+  function visibleNamesFromStacked(sc){
+    try{
+      const names = [];
+      const ds = sc?.data?.datasets || [];
+      for (let i=0;i<ds.length;i++){
+        const lab = (ds[i] && ds[i].label) ? (''+ds[i].label).trim() : '';
+        if (!lab) continue;
+        // Account for Chart.js v3/v4 meta.hidden vs isDatasetVisible
+        const visible = (typeof sc.isDatasetVisible === 'function')
+          ? sc.isDatasetVisible(i)
+          : !(sc.getDatasetMeta(i)?.hidden);
+        if (visible) names.push(lab);
+      }
+      return Array.from(new Set(names));
+    }catch(_){ return []; }
   }
-  function buildDatasets(cats, selected){
-    const ds=[]; const palette=['#2563eb','#10b981','#f59e0b','#ef4444','#8b5cf6','#14b8a6','#f97316','#22c55e','#eab308','#3b82f6']; let i=0;
-    selected.forEach(name=>{ const c=cats.find(x=>(x.name||'')===name); if(!c) return;
-      ds.push({ label:c.name||'Categoría', data:(c.monthly||[]).map(v=>+v||0), borderColor:palette[i%palette.length], backgroundColor:palette[i%palette.length]+'55', borderWidth:2, tension:.25, fill:false });
-      i++;
+  function publishFromStacked(){
+    const sc = findStackedChart();
+    if (!sc) return;
+    const names = visibleNamesFromStacked(sc);
+    if (names && names.length) window.FILTERS.set(names);
+  }
+
+  // ---- 4) Subscriber: trend listens to FILTERS ----
+  function applyToTrend(selected){
+    const tChart = findTrendChart();
+    if (!tChart) return;
+    const st = getState();
+    const want = (selected && selected.length) ? selected.slice() : st.cats.map(c=> c.name);
+    const sets = st.cats
+      .filter(c => want.includes(c.name||''))
+      .map(c => ({
+        label: c.name||'Categoría',
+        data: (c.monthly||[]).map(v => +v||0),
+        borderColor: colorForSafe(c.name),
+        backgroundColor: colorForSafe(c.name)+'33',
+        borderWidth: 2, fill: false, tension: .25
+      }));
+    tChart.data.labels = st.months.slice();
+    tChart.data.datasets = sets;
+    tChart.update();
+  }
+
+  // ---- 5) Wire: legend clicks & updates on stacked publish new selection ----
+  function hookStackedOnce(){
+    const sc = findStackedChart();
+    if (!sc || sc.__filtersHooked) return !!sc;
+    sc.__filtersHooked = true;
+
+    // Wrap update to re-publish
+    const origUpdate = sc.update?.bind ? sc.update.bind(sc) : null;
+    if (origUpdate){
+      sc.update = function(){
+        const r = origUpdate.apply(this, arguments);
+        try{ setTimeout(publishFromStacked, 0); }catch(_){}
+        return r;
+      };
+    }
+
+    // Legend click -> toggle dataset visibility -> publish
+    sc.options.plugins = sc.options.plugins || {};
+    sc.options.plugins.legend = sc.options.plugins.legend || {};
+    const prevClick = sc.options.plugins.legend.onClick;
+    sc.options.plugins.legend.onClick = function(e, li, chart){
+      if (prevClick) prevClick(e, li, chart);
+      else {
+        const vis = chart.isDatasetVisible(li.datasetIndex);
+        chart.setDatasetVisibility(li.datasetIndex, !vis);
+        chart.update();
+      }
+      try{ setTimeout(publishFromStacked, 0); }catch(_){}
+    };
+    return true;
+  }
+
+  // ---- 6) Checkboxes (si existen) publican ----
+  function wireCheckboxes(){
+    const box = document.getElementById('allCatsChecks');
+    if (!box || box.__filtersWired) return;
+    box.__filtersWired = true;
+    box.addEventListener('change', function(){
+      const sel = Array.from(box.querySelectorAll('input[type="checkbox"]:checked'))
+        .map(i => i.dataset.cat || i.value || i.name || '').filter(Boolean);
+      window.FILTERS.set(sel);
     });
-    return ds;
+    // Botones rápidos
+    ['allCatsTop5','allCatsTop10','allCatsAll','allCatsNone','allCatsApply'].forEach(id=>{
+      const el = document.getElementById(id);
+      if (el && !el.__filtersWired){
+        el.__filtersWired = true;
+        el.addEventListener('click', function(){ setTimeout(function(){ 
+          // tras cambiar selección en UI, recalculamos a partir de checkboxes
+          const sel = Array.from(box.querySelectorAll('input[type="checkbox"]:checked'))
+            .map(i => i.dataset.cat || i.value || i.name || '').filter(Boolean);
+          window.FILTERS.set(sel);
+        }, 30); });
+      }
+    });
   }
-  function redrawTrend(){
-    const payload=getPayload(); if(!payload) return;
-    const cv=findTrendCanvas(); if(!cv) return;
-    const allNames=payload.cats.map(c=>c.name||'Categoría');
-    const selected=getSelectedCategories(allNames);
-    if(window.Chart&&Chart.getChart){ const inst=Chart.getChart(cv); if(inst&&inst.destroy) inst.destroy(); }
-    const ctx=cv.getContext('2d');
-    new Chart(ctx,{ type:'line', data:{ labels:payload.months.slice(), datasets:buildDatasets(payload.cats, selected) },
-      options:{ responsive:true, interaction:{mode:'nearest',intersect:false}, plugins:{legend:{position:'bottom'}}, scales:{ y:{beginAtZero:true} } } });
-  }
-  function wireFilters(){
-    const els=Array.from(document.querySelectorAll('input[type="checkbox"], select'));
-    els.forEach(el=>{ if(!el.__wiredTrend){ el.__wiredTrend=true; el.addEventListener('change', ()=> setTimeout(redrawTrend,10)); } });
-  }
-  function boot(){ wireFilters(); setTimeout(redrawTrend,50); }
-  if(document.readyState==='loading'){ document.addEventListener('DOMContentLoaded', boot); } else { boot(); }
-  setTimeout(wireFilters,800); setTimeout(wireFilters,1600);
+
+  // ---- 7) Trend subscriber ----
+  document.addEventListener('filters:change', function(e){
+    try{ applyToTrend(e.detail && e.detail.selected || []); }catch(_){}
+  });
+
+  // ---- 8) Boot: hook, wire, and initial publish ----
+  (function boot(){
+    let tries = 0;
+    (function wait(){
+      tries++;
+      wireCheckboxes();
+      const hooked = hookStackedOnce();
+      if (hooked){
+        // Publica lo que esté visible en el apilado como primer filtro
+        setTimeout(publishFromStacked, 150);
+      }
+      // Si aún no está todo listo, sigue intentando un rato
+      if (tries < 60) setTimeout(wait, 300);
+    })();
+  })();
+
+  // safety: si nada publica, fuerza "todas" a los 3s
+  setTimeout(function(){
+    if (!window.FILTERS.get().length){
+      const st = getState();
+      window.FILTERS.set(st.cats.map(c=> c.name).slice(0, 12)); // por ergonomía, máx 12
+    }
+  }, 3000);
 })();
 </script>
 
