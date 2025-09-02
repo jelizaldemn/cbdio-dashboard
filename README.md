@@ -1,1 +1,1 @@
-Sitio estático del dashboard. Subir a GitHub Pages (branch main, root).
+Sitio estático del dashboard con branding CBDIO y fix de filtros de tendencia.
