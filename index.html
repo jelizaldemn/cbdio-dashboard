@@ -4596,6 +4596,24 @@ table.compact th,table.compact td{padding:8px 10px;border-bottom:1px solid #e5e7
   .ext-trend-legend-card{ break-inside: avoid; }
 }
 </style>
+
+<style id="jle-print-detail-55">
+/* SOLO al imprimir/PDF: reducir tipografía del cuadro "Detalle por categoría (mensual)" */
+@media print {
+  .print-detail-monthly-55, .print-detail-monthly-55 table,
+  .print-detail-monthly-55 th, .print-detail-monthly-55 td {
+    font-size: 5.5pt !important;
+  }
+  .print-detail-monthly-55 th, .print-detail-monthly-55 td {
+    padding: 2px 3px !important;
+    line-height: 1.1 !important;
+    white-space: nowrap;
+  }
+  /* Evita que se corte feo entre páginas */
+  .print-detail-monthly-55 { break-inside: avoid; }
+}
+</style>
+
 </head>
 <body>
 </div>
@@ -7030,5 +7048,32 @@ function autoApplyAllCats(force=false){
   if (document.readyState === 'loading'){ document.addEventListener('DOMContentLoaded', boot); } else { boot(); }
 })();
 </script>
+
+<script id="jle-mark-detail-section">
+(function(){
+  function norm(t){
+    try{ t = (t||'').normalize('NFD').replace(/[\u0300-\u036f]/g,''); }catch(_){ t = (t||''); }
+    return t.toLowerCase().replace(/\s+/g,' ').trim();
+  }
+  function findDetailMonthly(){
+    var hs = document.querySelectorAll('h1,h2,h3,h4,h5');
+    for (var i=0;i<hs.length;i++){
+      var txt = norm(hs[i].textContent||'');
+      // Busca el encabezado "📋 Detalle por categoría (mensual)"
+      if (txt.includes('detalle por categoria') && txt.includes('mensual')){
+        return hs[i].closest('section, .card, .panel, .box, .container, div') || hs[i].parentElement;
+      }
+    }
+    return null;
+  }
+  function tag(){
+    var sec = findDetailMonthly(); if (!sec) return false;
+    sec.classList.add('print-detail-monthly-55');
+    return true;
+  }
+  if (document.readyState==='loading'){ document.addEventListener('DOMContentLoaded', tag); } else { tag(); }
+})();
+</script>
+
 </body>
 </html>
